@@ -81,6 +81,35 @@ def encrypt(plain, crypt_numeric):
     return cipher
 
 
+def decrypt(cipher, crypt_numeric):
+    """Decrypts each character according to its distance to the letter of the alphabet
+    corresponding to its position in the string modulo 25.
+
+    Args:
+        cipher (string): the text to decrypt
+        crypt_numeric (bool): weather to encrypt numeric characters or not
+
+    Returns:
+        string: the decrypted text
+    """
+    cipher = ""
+    counter_alpha, counter_num = 0, 0
+
+    plain = ""
+    for c in cipher:
+        if c.isalpha():
+            plain += chr(abs(ord(c) + (counter_alpha + 97)) - 97)
+            counter_alpha += 1
+            counter_alpha %= 26
+        elif c.isnumeric() and crypt_numeric is True:
+            cipher += chr(abs(ord(c) + (counter_num + 48)) - 48)
+            counter_num += 1
+            counter_num %= 10
+        else:
+            plain += c
+    return plain
+
+
 def main():
     action = input(
         "Do you want to encrypt or decrypt a string ? (e/d)")
@@ -101,6 +130,18 @@ def main():
         crypt_numeric = binput("Do you want to encrypt numeric characters ? (y/n)")
 
         print("Encrypted text :\n" + encrypt(plain, crypt_numeric))
+
+    # Decrypt cipher text
+    elif action == 'd':
+
+        cipher = input("Enter a string:\n")
+        while is_ascii(cipher) is False:
+            plain = input("Please use ASCII characters only: ")
+
+        crypt_numeric = binput(
+            "Do you want to decrypt numeric characters ? (y/n)")
+
+        print("Plain text :\n" + decrypt(cipher, crypt_numeric))
 
 
 if __name__ == "__main__":
