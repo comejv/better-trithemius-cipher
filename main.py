@@ -52,6 +52,34 @@ except ImportError:
         wprint("Diacritics will not be handled.")
 
 
+def encrypt(plain, crypt_numeric):
+    """Encrypts each character according to its distance to the letter of the alphabet
+    corresponding to its position in the string modulo 25.
+
+    Args:
+        plain (string): the text to encrypt
+        crypt_numeric (bool): weather to encrypt numeric characters or not
+
+    Returns:
+        string: the encrypted text
+    """
+    cipher = ""
+    counter_alpha, counter_num = 0, 0
+
+    cipher = ""
+    for c in plain:
+        if c.isalpha():
+            cipher += chr(abs(ord(c) - (counter_alpha + 97)) + 97)
+            counter_alpha += 1
+            counter_alpha %= 26
+        elif c.isnumeric() and crypt_numeric is True:
+            cipher += chr(abs(ord(c) - (counter_num + 48)) + 48)
+            counter_num += 1
+            counter_num %= 10
+        else:
+            cipher += c
+    return cipher
+
 
 def main():
     action = input(
