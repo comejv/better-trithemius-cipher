@@ -54,7 +54,7 @@ try:
 except ImportError:
     wprint("Unidecode module not found.")
     use_diacritics = binput(
-        "Do you want to install it or skip and continue without diacritic characters ?\n(y : install / n : pass)")
+        "Do you want to install it with or skip and continue without diacritic characters ?\n(y : install / n : pass)")
     if use_diacritics is True:
         subprocess.check_call(
             [sys.executable, "-m", "pip", "install", "unidecode"])
