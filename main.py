@@ -199,7 +199,7 @@ def main_args():
 
 if __name__ == "__main__":
     try:
-        if len(sys.argv) == 0:
+        if len(sys.argv) < 2:
             main_textuel()
         else:
             main_args()
