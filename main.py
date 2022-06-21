@@ -5,12 +5,18 @@ import random
 ANSI = {
     "BOLD": "\x1b[1m",
     "BOLDR": "\x1b[1;91m",
+    "UNDER": "\x1b[4m",
+    "REVB": "\x1b[5;7m",
     "ENDC": "\x1b[0m"
 }
 
 ALPHA = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
          'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 NUM = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+
+
+def clear():
+    print("\x1b[2J\x1b[H")
 
 
 def eprint(text, *args, **kwargs):
@@ -24,13 +30,14 @@ def wprint(text, *args, **kwargs):
 
 
 def binput(prompt):
-    str_input = input(prompt)
-    bool_input = ['true', '1', 't', 'y', 'yes',
-                  'false', '0', 'f', 'n', 'no']
+    str_input = input(ANSI['BOLD'] + prompt + ANSI['ENDC'])
+    bool_input = ['true', '1', 't', 'y', 'yes', 'i',
+                  'false', '0', 'f', 'n', 'no', 'p']
 
     while str_input not in bool_input:
-        str_input = input("\x1b[1F\x1b[K" + prompt)
-    if str_input.lower() in bool_input[:7]:
+        str_input = input("\x1b[1F\x1b[K" +
+                          ANSI["BOLD"] + prompt + ANSI["ENDC"])
+    if str_input.lower() in bool_input[:6]:
         return True
     return False
 
@@ -41,6 +48,7 @@ def is_ascii(s):
 
 use_diacritics = 'y'
 
+clear()
 try:
     from unidecode import unidecode
 except ImportError:
@@ -113,48 +121,51 @@ def decrypt(cipher, crypt_numeric):
 
 
 def main():
+    clear()
+
     # Encrypt or Decrypt
     action = input(
-        "Do you want to encrypt or decrypt a string ? (e/d)")
+        ANSI['BOLD'] + "Encrypt or Decrypt ? (e : encrypt / d : decrypt)" + ANSI['ENDC'])
+
     while action not in ['e', 'd']:
         action = input(
-            "Do you want to encrypt or decrypt a string ? (e/d)")
+            ANSI['BOLD'] + "Encrypt or Decrypt ? (e : encrypt / d : decrypt)" + ANSI['ENDC'])
 
     # Random shuffle with key
     shuffle = binput("Do you want to use a key ? (y/n)")
 
     if shuffle is True:
-        key = int(input("Enter a key (integer): "))
+        key = int(
+            input(ANSI['BOLD'] + "Enter a key (integer): " + ANSI['ENDC']))
         random.Random(key).shuffle(ALPHA)
         random.Random(key).shuffle(NUM)
         print(ALPHA)
 
-    # Encrypt plain text
-    if action == 'e':
+    clear()
+    text = input("Enter a string:\n")
+    if use_diacritics is False:
+        while text.isascii() is False:
+            text = input("Please use ASCII characters only:\n")
+    else:
+        text = unidecode(text)
 
-        if use_diacritics is False:
-            plain = input("Enter a string:\n")
-            while plain.isascii() is False:
-                plain = input("Please use ASCII characters only: ")
-        else:
-            plain = unidecode(input("Enter a string:\n"))
-
+    crypt_numeric = False
+    if any(char.isdigit() for char in text):
         crypt_numeric = binput(
             "Do you want to encrypt numeric characters ? (y/n)")
 
-        print("Encrypted text :\n" + encrypt(plain.lower(), crypt_numeric))
+    clear()
+
+    # Encrypt plain text
+    if action == 'e':
+        print("Encrypted text :\n\n" + encrypt(text.lower(), crypt_numeric))
 
     # Decrypt cipher text
     elif action == 'd':
+        print("Plain text :\n\n" + decrypt(text.lower(), crypt_numeric))
 
-        cipher = input("Enter a string:\n")
-        while cipher.isascii() is False:
-            cipher = input("Please use ASCII characters only: ")
-
-        crypt_numeric = binput(
-            "Do you want to decrypt numeric characters ? (y/n)")
-
-        print("Plain text :\n" + decrypt(cipher.lower(), crypt_numeric))
+    input('\n\n' + ANSI["REVB"] + "PRESS ENTER TO CLEAR THE SCREEN" + ANSI['ENDC'])
+    clear()
 
 
 if __name__ == "__main__":
