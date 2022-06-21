@@ -72,11 +72,11 @@ def encrypt(plain, crypt_numeric):
     cipher = ""
     for c in plain:
         if c.isalpha():
-            cipher += ALPHA[ord(c) - (counter_alpha + 97)]
+            cipher += ALPHA[(ALPHA.index(c) + counter_alpha) % 26]
             counter_alpha += 1
             counter_alpha %= 26
         elif c.isnumeric() and crypt_numeric is True:
-            cipher += NUM[ord(c) - (counter_num + 48)]
+            cipher += NUM[(NUM.index(c) + counter_num) % 10]
             counter_num += 1
             counter_num %= 10
         else:
@@ -100,11 +100,11 @@ def decrypt(cipher, crypt_numeric):
 
     for c in cipher:
         if c.isalpha():
-            plain += ALPHA[(ord(c) - 97 + counter_alpha) % 26]
+            plain += ALPHA[(ALPHA.index(c) - counter_alpha) % 26]
             counter_alpha += 1
             counter_alpha %= 26
         elif c.isnumeric() and crypt_numeric is True:
-            plain += NUM[(ord(c) - 48 + counter_num) % 10]
+            plain += NUM[(NUM.index(c) - counter_num) % 10]
             counter_num += 1
             counter_num %= 10
         else:
