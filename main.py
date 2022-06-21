@@ -1,5 +1,6 @@
 import sys
 import subprocess
+import random
 
 ANSI = {
     "BOLD": "\x1b[1m",
@@ -112,11 +113,21 @@ def decrypt(cipher, crypt_numeric):
 
 
 def main():
+    # Encrypt or Decrypt
     action = input(
         "Do you want to encrypt or decrypt a string ? (e/d)")
     while action not in ['e', 'd']:
         action = input(
             "Do you want to encrypt or decrypt a string ? (e/d)")
+
+    # Random shuffle with key
+    shuffle = binput("Do you want to use a key ? (y/n)")
+
+    if shuffle is True:
+        key = int(input("Enter a key (integer): "))
+        random.Random(key).shuffle(ALPHA)
+        random.Random(key).shuffle(NUM)
+        print(ALPHA)
 
     # Encrypt plain text
     if action == 'e':
