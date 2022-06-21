@@ -1,4 +1,3 @@
-from crypt import crypt
 import sys
 import subprocess
 import random
