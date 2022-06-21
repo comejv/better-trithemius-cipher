@@ -47,16 +47,15 @@ def is_ascii(s):
     return all(ord(c) < 128 for c in s)
 
 
-use_diacritics = 'y'
-
 clear()
 try:
     from unidecode import unidecode
+    handle_diacritics = True
 except ImportError:
     wprint("Unidecode module not found.")
-    use_diacritics = binput(
+    handle_diacritics = binput(
         "Do you want to install it with or skip and continue without diacritic characters ?\n(y : install / n : pass)")
-    if use_diacritics is True:
+    if handle_diacritics is True:
         subprocess.check_call(
             [sys.executable, "-m", "pip", "install", "unidecode"])
         from unidecode import unidecode
@@ -174,7 +173,7 @@ def main():
 
     clear()
     text = input("Enter a string:\n")
-    if use_diacritics is False:
+    if handle_diacritics is False:
         while text.isascii() is False:
             text = input("Please use ASCII characters only:\n")
     else:
