@@ -1,4 +1,4 @@
-# py-crypt
+# (better) Python Trithemius
 Simple encryption script based on the position of the char relatively to a juxtaposed alphabet (that can be shuffled with a given key), then transformed into a letter again. Similar to the Trithemius cipher.
 
 Non alphanumeric characters are not encrypted (except space when using level 2 or 3).
