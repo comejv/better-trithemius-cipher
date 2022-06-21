@@ -12,6 +12,7 @@ ANSI = {
 
 ALPHA = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
          'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+
 NUM = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 
@@ -63,60 +64,73 @@ except ImportError:
         wprint("Diacritics will not be handled.")
 
 
-def encrypt(plain, crypt_numeric):
-    """Encrypts each character according to its distance to the letter of the alphabet
-    corresponding to its position in the string modulo 25.
+def encrypt(plain, security_level):
+    """Decrypts each character according to its distance relative distance to item in list used to encrypt.
 
     Args:
         plain (string): the text to encrypt
-        crypt_numeric (bool): weather to encrypt numeric characters or not
+        security_level (int): determines the level of encryption used
 
     Returns:
         string: the encrypted text
     """
     cipher = ""
-    counter_alpha, counter_num = 0, 0
+    counter_alpha, counter_num, counter_alpha_num = 0, 0, 0
 
-    cipher = ""
     for c in plain:
-        if c.isalpha():
+        if security_level <= 1 and c in ALPHA:
             cipher += ALPHA[(ALPHA.index(c) + counter_alpha) % 26]
             counter_alpha += 1
             counter_alpha %= 26
-        elif c.isnumeric() and crypt_numeric is True:
-            cipher += NUM[(NUM.index(c) + counter_num) % 10]
+
+        elif security_level == 1 and c in NUM:
+            cipher += NUM[(NUM.index(c) + counter_alpha) % 10]
             counter_num += 1
             counter_num %= 10
+
+        elif security_level >= 2 and c in ALPHANUM:
+            cipher += ALPHANUM[(ALPHANUM.index(c) + counter_alpha_num) % 37]
+            counter_alpha_num += 1
+            counter_alpha_num %= 37
+
         else:
             cipher += c
+
     return cipher
 
 
-def decrypt(cipher, crypt_numeric):
-    """Decrypts each character according to its distance to the letter of the alphabet
-    corresponding to its position in the string modulo 25.
+def decrypt(cipher, security_level):
+    """Decrypts each character according to its distance relative distance to item in list used to encrypt.
 
     Args:
         cipher (string): the text to decrypt
-        crypt_numeric (bool): weather to encrypt numeric characters or not
+        security_level (int): determines the level of encryption used
 
     Returns:
         string: the decrypted text
     """
     plain = ""
-    counter_alpha, counter_num = 0, 0
+    counter_alpha, counter_num, counter_alpha_num = 0, 0, 0
 
     for c in cipher:
-        if c.isalpha():
+        if security_level <= 1 and c in ALPHA:
             plain += ALPHA[(ALPHA.index(c) - counter_alpha) % 26]
             counter_alpha += 1
             counter_alpha %= 26
-        elif c.isnumeric() and crypt_numeric is True:
+
+        elif security_level == 1 and c in NUM:
             plain += NUM[(NUM.index(c) - counter_num) % 10]
             counter_num += 1
             counter_num %= 10
+
+        elif security_level >= 2 and c in ALPHANUM:
+            plain += ALPHANUM[(ALPHANUM.index(c) - counter_alpha_num) % 37]
+            counter_alpha_num += 1
+            counter_alpha_num %= 37
+
         else:
             plain += c
+
     return plain
 
 
@@ -131,15 +145,32 @@ def main():
         action = input(
             ANSI['BOLD'] + "Encrypt or Decrypt ? (e : encrypt / d : decrypt)" + ANSI['ENDC'])
 
-    # Random shuffle with key
-    shuffle = binput("Do you want to use a key ? (y/n)")
+    security_level = int(input("What level of security do you want ? (0-3)"))
 
-    if shuffle is True:
+    # Only the words are encrypted
+    if security_level <= 0:
+        pass
+
+    # Level 1 and numbers are encrypted
+    elif security_level == 1:
         key = int(
             input(ANSI['BOLD'] + "Enter a key (integer): " + ANSI['ENDC']))
         random.Random(key).shuffle(ALPHA)
         random.Random(key).shuffle(NUM)
-        print(ALPHA)
+
+    # Level 2 and structure is not preserved
+    elif security_level >= 2:
+        global ALPHANUM
+        ALPHANUM = ALPHA + NUM
+        ALPHANUM.append(' ')
+
+    # Level 3 and shuffle of ALPHANUM
+    if security_level >= 3:
+        ALPHANUM = ALPHA + NUM
+        ALPHANUM.append(' ')
+        key = int(
+            input(ANSI['BOLD'] + "Enter a key (integer): " + ANSI['ENDC']))
+        random.Random(key).shuffle(ALPHANUM)
 
     clear()
     text = input("Enter a string:\n")
@@ -149,22 +180,18 @@ def main():
     else:
         text = unidecode(text)
 
-    crypt_numeric = False
-    if any(char.isdigit() for char in text):
-        crypt_numeric = binput(
-            "Do you want to encrypt numeric characters ? (y/n)")
-
     clear()
 
     # Encrypt plain text
     if action == 'e':
-        print("Encrypted text :\n\n" + encrypt(text.lower(), crypt_numeric))
+        print("Encrypted text :\n\n" + encrypt(text.lower(), security_level))
 
     # Decrypt cipher text
     elif action == 'd':
-        print("Plain text :\n\n" + decrypt(text.lower(), crypt_numeric))
+        print("Plain text :\n\n" + decrypt(text.lower(), security_level))
 
-    input('\n\n' + ANSI["REVB"] + "PRESS ENTER TO CLEAR THE SCREEN" + ANSI['ENDC'])
+    input('\n\n' + ANSI["REVB"] +
+          "PRESS ENTER TO CLEAR THE SCREEN" + ANSI['ENDC'])
     clear()
 
 
