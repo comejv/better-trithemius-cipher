@@ -1,6 +1,7 @@
-import sys
-import subprocess
+import argparse
 import random
+import subprocess
+import sys
 
 ANSI = {
     "BOLD": "\x1b[1m",
@@ -98,7 +99,7 @@ def decrypt(cipher, security_level):
     return encrypt(cipher, security_level, decrypt=True)
 
 
-def main():
+def main_textuel():
     clear()
 
     # Encrypt or Decrypt
@@ -157,9 +158,52 @@ def main():
     clear()
 
 
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-e', '--encrypt', action='store_true',
+                    help='Encrypt a string')
+parser.add_argument('-d', '--decrypt', action='store_true',
+                    help='Decrypt a string')
+parser.add_argument('-s', '--security', type=int, default=0, choices=[0, 1, 2, 3],
+                    help='0 - encrypts only the words\n\
+                        1 - level 0 + encrypts numbers\n\
+                        2 - level 1 + word structure randomised\n\
+                        3 - level 2 + shuffles the alphabet')
+parser.add_argument('-k', '--key', type=int, action='store',
+                    help='Key to use for encryption/decryption')
+parser.add_argument('-t', '--text', type=str, default=None)
+
+args = parser.parse_args()
+
+
+def main_args():
+    if args.security == 1:
+        random.Random(args.key).shuffle(ALPHA)
+        random.Random(args.key).shuffle(NUM)
+
+    if args.security >= 2:
+        global ALPHANUM
+        ALPHANUM = ALPHA + NUM
+        ALPHANUM.append(' ')
+
+    if args.security >= 3:
+        random.Random(args.key).shuffle(ALPHANUM)
+
+    if args.text is None:
+        text = input()
+    else:
+        text = args.text
+
+    print(encrypt(text, args.security, args.decrypt))
+
+
 if __name__ == "__main__":
     try:
-        main()
+        if len(sys.argv) == 0:
+            main_textuel()
+        else:
+            main_args()
+
     except KeyboardInterrupt:
         print("\x1b[2K\rProcess interrupted by user...")
         exit(1)
