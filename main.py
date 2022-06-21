@@ -12,6 +12,10 @@ ANSI = {
     "ENDC": "\x1b[0m"
 }
 
+ALPHA = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+         'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+NUM = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+
 
 def eprint(text, *args, **kwargs):
     print(ANSI["BOLDR"] + "Error :", text +
@@ -25,9 +29,12 @@ def wprint(text, *args, **kwargs):
 
 def binput(prompt):
     str_input = input(prompt)
-    while str_input not in ['true', '1', 't', 'y', 'yes', 'o', 'oui', 'false', '0', 'f', 'n', 'no', 'non']:
+    bool_input = ['true', '1', 't', 'y', 'yes',
+                  'false', '0', 'f', 'n', 'no']
+
+    while str_input not in bool_input:
         str_input = input("\x1b[1F\x1b[K" + prompt)
-    if str_input.lower() in ['true', '1', 't', 'y', 'yes', 'o', 'oui']:
+    if str_input.lower() in bool_input[:7]:
         return True
     return False
 
@@ -69,11 +76,11 @@ def encrypt(plain, crypt_numeric):
     cipher = ""
     for c in plain:
         if c.isalpha():
-            cipher += chr(abs(ord(c) - (counter_alpha + 97)) + 97)
+            cipher += ALPHA[ord(c) - (counter_alpha + 97)]
             counter_alpha += 1
             counter_alpha %= 26
         elif c.isnumeric() and crypt_numeric is True:
-            cipher += chr(abs(ord(c) - (counter_num + 48)) + 48)
+            cipher += NUM[ord(c) - (counter_num + 48)]
             counter_num += 1
             counter_num %= 10
         else:
@@ -81,31 +88,72 @@ def encrypt(plain, crypt_numeric):
     return cipher
 
 
+def decrypt(cipher, crypt_numeric):
+    """Decrypts each character according to its distance to the letter of the alphabet
+    corresponding to its position in the string modulo 25.
+
+    Args:
+        cipher (string): the text to decrypt
+        crypt_numeric (bool): weather to encrypt numeric characters or not
+
+    Returns:
+        string: the decrypted text
+    """
+    plain = ""
+    counter_alpha, counter_num = 0, 0
+
+    for c in cipher:
+        if c.isalpha():
+            plain += ALPHA[(ord(c) - 97 + counter_alpha) % 26]
+            counter_alpha += 1
+            counter_alpha %= 26
+        elif c.isnumeric() and crypt_numeric is True:
+            plain += NUM[(ord(c) - 48 + counter_num) % 10]
+            counter_num += 1
+            counter_num %= 10
+        else:
+            plain += c
+    return plain
+
+
 def main():
     action = input(
         "Do you want to encrypt or decrypt a string ? (e/d)")
     while action not in ['e', 'd']:
         action = input(
-            "\x1b[1F\x1b[KDo you want to encrypt or decrypt a string ? (e/d)")
+            "Do you want to encrypt or decrypt a string ? (e/d)")
 
     # Encrypt plain text
     if action == 'e':
 
         if use_diacritics is False:
             plain = input("Enter a string:\n")
-            while is_ascii(plain) is False:
+            while plain.isascii() is False:
                 plain = input("Please use ASCII characters only: ")
         else:
             plain = unidecode(input("Enter a string:\n"))
 
-        crypt_numeric = binput("Do you want to encrypt numeric characters ? (y/n)")
+        crypt_numeric = binput(
+            "Do you want to encrypt numeric characters ? (y/n)")
 
-        print("Encrypted text :\n" + encrypt(plain, crypt_numeric))
+        print("Encrypted text :\n" + encrypt(plain.lower(), crypt_numeric))
+
+    # Decrypt cipher text
+    elif action == 'd':
+
+        cipher = input("Enter a string:\n")
+        while cipher.isascii() is False:
+            cipher = input("Please use ASCII characters only: ")
+
+        crypt_numeric = binput(
+            "Do you want to decrypt numeric characters ? (y/n)")
+
+        print("Plain text :\n" + decrypt(cipher.lower(), crypt_numeric))
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\nProcess interrupted by user...")
+        print("\x1b[2K\rProcess interrupted by user...")
         exit(1)
